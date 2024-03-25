@@ -4,7 +4,6 @@ class MainDrawer extends StatelessWidget {
   const MainDrawer({super.key, required this.onSelectscreen});
 
   final void Function(String identifier) onSelectscreen;
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -77,7 +76,7 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               onSelectscreen('filters');
             },
-          )
+          ),
         ],
       ),
     );

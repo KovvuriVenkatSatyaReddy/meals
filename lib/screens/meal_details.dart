@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
+import 'package:meals/controllers/favorite_meals_controller.dart';
 import 'package:meals/models/meal.dart';
-import 'package:meals/providers/favorites_provider.dart';
 
-class MealDetailsScreen extends ConsumerWidget {
+class MealDetailsScreen extends StatelessWidget {
   const MealDetailsScreen({
     super.key,
     required this.meal,
@@ -11,45 +11,48 @@ class MealDetailsScreen extends ConsumerWidget {
   final Meal meal;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final favoriteMeals = ref.watch(favoriteMealsProvider);
-    final isFavorite = favoriteMeals.contains(meal);
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(meal.title),
         actions: [
-          IconButton(
-            onPressed: () {
-              final wasAdded = ref
-                  .read(favoriteMealsProvider.notifier)
-                  .toggleMealFavoriteStatus(meal);
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                      wasAdded ? 'Meal added as a favorite' : 'Meal removed'),
+          GetBuilder<FavoriteMealsController>(
+            builder: (controller) {
+              return IconButton(
+                onPressed: () {
+                  final wasAdded = controller.toggleFavoriteStatus(meal);
+                  ScaffoldMessenger.of(context).clearSnackBars();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(wasAdded
+                          ? 'Meal added as a favorite'
+                          : 'Meal removed'),
+                    ),
+                  );
+                },
+                icon: AnimatedSwitcher(
+                  duration: const Duration(
+                    milliseconds: 300,
+                  ),
+                  transitionBuilder: (child, animation) {
+                    return RotationTransition(
+                      turns: Tween<double>(
+                        begin: 0.9,
+                        end: 1.0,
+                      ).animate(animation),
+                      child: child,
+                    );
+                  },
+                  child: Icon(
+                    controller.favoriteMeals.contains(meal)
+                        ? Icons.star
+                        : Icons.star_border,
+                    key: ValueKey(controller.favoriteMeals.contains(meal)),
+                  ),
                 ),
               );
             },
-            icon: AnimatedSwitcher(
-              duration: const Duration(
-                milliseconds: 300,
-              ),
-              transitionBuilder: (child, animation) {
-                return RotationTransition(
-                  turns: Tween<double>(
-                    begin: 0.9,
-                    end: 1.0,
-                  ).animate(animation),
-                  child: child,
-                );
-              },
-              child: Icon(
-                isFavorite ? Icons.star : Icons.star_border,
-                key: ValueKey(isFavorite),
-              ),
-            ),
-          ),
+          )
         ],
       ),
       body: SingleChildScrollView(

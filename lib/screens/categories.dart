@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
+import 'package:meals/controllers/filters_controller.dart';
 import 'package:meals/data/dummy_data.dart';
 import 'package:meals/models/category.dart';
 import 'package:meals/models/meal.dart';
@@ -41,19 +42,18 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     _animationController.dispose();
   }
 
-  void _selectCategory(BuildContext context, Category category) {
-    final filteredMeals = widget.availableMeals
+  void _selectCategory(Category category) {
+    FilterController filterController = Get.find<FilterController>();
+    final filteredMeals = filterController
+        .filteredMeals()
         .where((meal) => meal.categories.contains(category.id))
         .toList();
-
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (ctx) => MealsScreen(
-          title: category.title,
-          meals: filteredMeals,
-        ),
+    Get.to(
+      () => MealsScreen(
+        title: category.title,
+        meals: filteredMeals,
       ),
-    ); // Navigator.push(context, route)
+    );
   }
 
   @override
@@ -69,12 +69,11 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           mainAxisSpacing: 20,
         ),
         children: [
-          // availableCategories.map((category) => CategoryGridItem(category: category)).toList()
           for (final category in availableCategories)
             CategoryGridItem(
               category: category,
               onSelectCategory: () {
-                _selectCategory(context, category);
+                _selectCategory(category);
               },
             )
         ],
@@ -85,7 +84,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           end: const Offset(0, 0),
         ).animate(
           CurvedAnimation(
-              parent: _animationController, curve: Curves.easeInOut),
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
         ),
         child: child,
       ),
